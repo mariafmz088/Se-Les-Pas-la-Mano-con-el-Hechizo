@@ -1,0 +1,1165 @@
+/* =========================================================================
+   1. CONFIGURACIÓN BASE, RESET Y CLASES GLOBALES
+   ========================================================================= */
+
+:root {
+    --bg-dark: #1e1e1e;
+    --bg-window: #252526;
+    --bg-header: #323233;
+    --text-main: #d4d4d4;
+    --accent-purple: #c586c0;
+    --accent-blue: #4fc1ff;
+    --accent-green: #6a9955;
+    --accent-orange: #ce9178;
+    --accent-yellow: #dcdcaa;
+    --red-dot: #ff5f56;
+    --yellow-dot: #ffbd2e;
+    --green-dot: #27c93f;
+    --neon-pink: #ff79c6;
+}
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Consolas', 'Courier New', Courier, monospace;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+}
+.hidden { 
+    display: none !important; 
+}
+.text-center { 
+    text-align: center; 
+}
+.screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; z-index: 10;
+}
+
+
+/* =========================================================================
+   2. EL ESCRITORIO PRINCIPAL Y EL DOCK
+   ========================================================================= */
+
+#desktop-screen {
+    justify-content: flex-start;
+    align-items: stretch;
+    background-color: #1a1a1a;
+    background-image: radial-gradient(circle at center, rgba(44, 26, 48, 0.85) 0%, #121212 100%), 
+                      url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' width='60' height='60' viewBox='0 0 24 24' fill='%23ff79c6' fill-opacity='0.12'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+}
+.system-dock-right {
+    position: fixed;
+    right: 0; top: 38px;
+    width: 100px; height: calc(100vh - 38px);
+    background-color: rgba(37, 37, 38, 0.85);
+    border-left: 1px solid #3c3c3c;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 15px; gap: 12px; z-index: 100;
+    backdrop-filter: blur(5px);
+}
+.dock-title { 
+    font-size: 11px; 
+    font-weight: bold; 
+    color: #666; 
+    letter-spacing: 1px; 
+    margin-bottom: 5px; 
+}
+.dock-item {
+    width: 85px; padding: 8px 4px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid #444; border-radius: 6px;
+    font-size: 11px; text-align: center; cursor: pointer;
+    color: #888; transition: all 0.2s ease;
+}
+.dock-item:hover { 
+    background-color: rgba(255, 255, 255, 0.1); 
+    color: #fff; 
+}
+.dock-item.running { 
+    border-color: var(--accent-blue); 
+    color: var(--accent-blue); 
+    background-color: rgba(79, 193, 255, 0.08); 
+    box-shadow: 0 0 4px rgba(79, 193, 255, 0.2); 
+}
+.dock-item.minimized { 
+    border-color: var(--accent-yellow); 
+    color: var(--accent-yellow); 
+    background-color: rgba(255, 189, 46, 0.08); 
+}
+.file-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 110px); 
+    grid-auto-rows: 110px;
+    gap: 20px; 
+    justify-content: flex-start;
+    position: absolute; 
+    top: 25px; 
+    left: 25px; 
+    z-index: 5;
+}
+
+/* =========================================================================
+   3. ARQUITECTURA DE VENTANAS Y BARRAS
+   ========================================================================= */
+
+.window {
+    position: absolute;
+    top: 120px; 
+    left: calc(50% - 250px);
+    width: 500px; 
+    background-color: var(--bg-window);
+    border: 1px solid #444; 
+    border-radius: 6px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6); 
+    z-index: 20;
+    resize: both; 
+    overflow: auto;
+    min-width: 340px; 
+    min-height: 220px;
+    max-width: 75vw; 
+    max-height: 75vh;
+}
+.window-body { 
+    padding: 20px; 
+    font-size: 15px; 
+    line-height: 1.6; 
+    overflow-y: auto; 
+    height: calc(100% - 38px); 
+}
+.window-header {
+    background-color: var(--bg-header);
+    height: 38px;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    user-select: none;
+    border-bottom: 1px solid #2b2b2b;
+}
+.dot-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 10;
+}
+
+.draggable-header { 
+    cursor: move; 
+}
+.system-bar { 
+    background-color: var(--bg-header); 
+    padding: 6px 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 13px; 
+    border-bottom: 1px solid #3c3c3c; 
+    height: 38px; 
+    align-items: center;
+}
+.system-title { 
+    color: var(--accent-purple); 
+    font-weight: bold; 
+}
+.system-clock { 
+    color: var(--accent-yellow); 
+}
+
+
+/* =========================================================================
+   4. BOTONES, ACCIONES Y DETALLES DE LAS VENTANAS
+   ========================================================================= */
+
+.dot {
+    width: 12px; 
+    height: 12px;
+    border-radius: 50%; 
+    display: inline-block;
+    cursor: pointer;
+}
+.dot.red { 
+    background-color: var(--red-dot); 
+}
+.dot.yellow { 
+    background-color: var(--yellow-dot); 
+}
+.dot.green { 
+    background-color: var(--green-dot); 
+}
+.window-title {
+    position: absolute;
+    width: 100%; 
+    text-align: center;
+    left: 0; 
+    top: 50%; 
+    transform: translateY(-50%);
+    font-size: 13px; 
+    color: #9cdcfe;
+    pointer-events: none; 
+    font-weight: bold;
+    z-index: 1;
+}
+.close-btn-x {
+    position: absolute;
+    right: 15px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    font-size: 11px; 
+    cursor: pointer;
+    z-index: 10; 
+    color: #888;
+}
+.close-btn-x:hover { 
+    color: #fff; 
+}
+button { 
+    background-color: #3a3d3d; 
+    color: var(--text-main); 
+    border: 1px solid #555;
+    padding: 8px 16px; 
+    font-family: inherit; 
+    cursor: pointer; 
+    margin-top: 15px; 
+    border-radius: 4px; 
+    transition: all 0.2s ease; 
+}
+button:hover { 
+    background-color: var(--accent-purple); 
+    color: #fff; 
+    border-color: var(--neon-pink); 
+    box-shadow: 0 0 8px var(--neon-pink); 
+}
+/* Estilos específicos para la ventana de advertencia del viejito */
+#win-viejito {
+    width: 350px;
+    z-index: 99999;
+}
+#win-viejito .window-body {
+    background-color: #252526;
+    padding: 20px;
+}
+#win-viejito p.warning-title {
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #ece5ba;
+}
+#win-viejito p.warning-desc {
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+#win-viejito .btn-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+#win-viejito .btn-green {
+    background-color: #6a9955;
+}
+/* Estilos específicos para la Alerta de Seguridad de la Papelera */
+#win-alerta-papelera {
+    width: 380px;
+    z-index: 999999;
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 20px rgba(206, 145, 120, 0.4);
+}
+#win-alerta-papelera .window-body {
+    background-color: #252526;
+    padding: 25px;
+}
+#win-alerta-papelera p.alert-title {
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: var(--accent-orange);
+}
+#win-alerta-papelera p.alert-desc {
+    font-size: 13px;
+    color: #fff;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+#win-alerta-papelera .btn-alert-close {
+    background-color: #3a3d3d;
+    color: var(--text-main);
+    width: 100%;
+}
+
+
+
+
+
+/* =========================================================================
+   5. COMPONENTES DE CARGAS Y CHISTES
+   ========================================================================= */
+
+.terminal-window {
+    width: 90%; 
+    max-width: 600px;
+    background-color: var(--bg-window); 
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    border: 1px solid #3c3c3c; 
+    overflow: hidden;
+}
+.terminal-body-bg {
+    background-color: #0c0c0c; 
+    color: #d4d4d4;
+    min-height: 220px; 
+    padding: 20px;
+    font-family: monospace; 
+    white-space: pre-wrap; 
+    line-height: 1.6;
+}
+.joke-box {
+    background-color: #151515; 
+    border: 1px solid #444; 
+    padding: 20px; 
+    border-radius: 6px;
+    min-height: 90px; 
+    display: flex; align-items: center; 
+    justify-content: center; 
+    margin: 20px 0;
+    color: var(--accent-orange); 
+    font-size: 15px; 
+    line-height: 1.4;
+}
+.progress-container { 
+    background-color: #333; 
+    width: 100%; height: 14px; 
+    border-radius: 10px; 
+    overflow: hidden; 
+    border: 1px solid #555; 
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); 
+}
+.progress-bar { 
+    background: linear-gradient(90deg, var(--accent-purple), var(--neon-pink)); 
+    width: 0%; 
+    height: 100%; 
+    transition: width 0.1s linear; 
+    box-shadow: 0 0 8px var(--neon-pink); 
+}
+.spinner-love { 
+    font-weight: bold; 
+    color: var(--accent-blue); 
+    margin-bottom: 10px; }
+.terminal-window.mini-box {
+    padding: 30px;
+    max-width: 500px;
+}
+
+/* 🌟 PORTAL VISUAL: Permite que el botón salga de la caja negra y del marco gris */
+#win-perdonar, 
+#forgive-content {
+    overflow: visible !important;
+}
+
+/* Forzamos que la ventana mantenga una base de medición estable */
+#win-perdonar {
+    position: absolute !important;
+}
+
+
+/* =========================================================================
+   6. CONTENIDO DEL ESCRITORIO, ICONOS Y ARCHIVOS
+   ========================================================================= */
+
+.desktop-content { 
+    flex: 1; 
+    position: relative  !important; 
+    padding: 20px; 
+    width: calc(100% - 100px); 
+}
+.file-icon { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    cursor: pointer; 
+    padding: 10px; 
+    border-radius: 6px; 
+    transition: background 0.2s; 
+    text-align: center; 
+}
+.file-icon:hover { 
+    background-color: rgba(255, 255, 255, 0.08); 
+}
+.icon-visual { 
+    font-size: 36px; 
+    margin-bottom: 8px; 
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); 
+}
+.icon-label { 
+    font-size: 12px; 
+    word-break: break-all; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8); 
+}
+.trash-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed #333;
+    color: #777;
+    text-decoration: line-through; /* Hace el efecto visual de estar borrado */
+}
+.trash-size {
+    color: var(--accent-green);
+    font-size: 11px;
+    text-decoration: none !important;
+    display: inline-block;
+    margin-left: auto;
+}
+/* Estilos específicos para el interior de la Papelera de Reciclaje */
+#win-papelera .window-body {
+    background-color: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: calc(100% - 38px);
+}
+#body-papelera {
+    font-size: 13px;
+    line-height: 1.8;
+    height: 100%;
+}
+#btn-vaciar-papelera {
+    background-color: #a31515;
+    color: #fff;
+    border-color: #ff5f56;
+    width: 100%;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+
+
+/* =========================================================================
+   7. WIDGETS DE ESCRITORIO, MARCADORES Y RECTIFICACIONES
+   ========================================================================= */
+
+.desktop-wallpaper-widget {
+    /* 🎯 CENTRADO EN BLAQUE GLOBAL */
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important; /* 🌟 REPARADO: Volvemos al centro puro */
+    transform: translate(-42%, -50%) !important; /* 🌟 COMPENSACIÓN: Mueve el bloque ligeramente a la derecha para no chocar con tus iconos de carpetas */
+    
+    /* 💻 ALINEACIÓN DE CÓDIGO INFORMÁTICO REAL */
+    text-align: left !important; /* 🌟 REPARADO: Se acabó el centrado falso de renglones */
+    width: auto !important;
+    
+    /* 🛡️ PROTECCIÓN TOTAL DE FONDO */
+    z-index: 0 !important; 
+    pointer-events: none !important; 
+}
+
+/* 🌟 CONFIGURACIÓN DE LAS LLAVES */
+.desktop-wallpaper-widget h1 {
+    font-family: 'Consolas', monospace;
+    font-style: italic !important; 
+    color: rgba(255, 255, 255, 0.16) !important; 
+    font-size: 52px !important; /* 🌟 REPARADO: Mucho más grande e imponente */
+    margin: 5px 0 !important;
+    font-weight: normal !important;
+    line-height: 1.1 !important;
+}
+
+/* 🌟 CONFIGURACIÓN DEL RETURN INTERNO */
+.desktop-wallpaper-widget p {
+    font-family: 'Consolas', monospace;
+    font-style: italic !important; 
+    color: rgba(255, 121, 198, 0.32) !important; 
+    font-size: 38px !important; /* 🌟 REPARADO: Mucho más grande e imponente */
+    margin: 0 !important;
+    padding-left: 55px !important; /* 🌟 SANGRÍA DE PROGRAMACIÓN: Empuja el return a la derecha con base en la llave */
+}
+
+
+.score-board {
+    position: absolute;
+    top: 25px;
+    left: 270px; /* Al lado de tus dos columnas de iconos */
+    background-color: rgba(37, 37, 38, 0.85);
+    border: 1px solid #444;
+    border-left: 4px solid var(--accent-yellow);
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    z-index: 5;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+.score-title {
+    font-size: 10px;
+    font-weight: bold;
+    color: #888;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+}
+.score-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--accent-yellow);
+}
+.score-goal {
+    font-size: 11px;
+    color: var(--accent-green);
+    margin-top: 3px;
+    font-style: italic;
+}
+.log-fix { 
+    color: #6a9955; 
+    font-weight: bold; 
+}
+.log-warn { 
+    color: #ece5ba; 
+    font-weight: bold; 
+}
+.log-info { 
+    color: #4fc1ff; 
+    font-weight: bold; 
+}
+.hint-text { 
+    color: var(--accent-green); 
+    font-size: 12px; 
+}
+.points { 
+    color: #27c93f; 
+    font-weight: bold; 
+    font-size: 16px; 
+    margin: 10px 0;
+}
+
+
+/* =========================================================================
+   8. ESTILOS DE TEXTOS ESPECÍFICOS (CARTAS, LOGS, CÓDIGO)
+   ========================================================================= */
+
+.letter-theme { 
+    background-color: #282c34; 
+    color: #abb2bf; 
+    white-space: pre-wrap; 
+}
+.code-theme { 
+    background-color: #1e1e1e; 
+    color: #9cdcfe; 
+}
+.j-key { 
+    color: #9cdcfe; 
+}
+.j-val { 
+    color: #b5cea8; 
+}
+.log-theme { 
+    background-color: #151515; 
+    font-size: 13px; 
+}
+
+
+/* =========================================================================
+   9. INTERFAZ DE LA TERMINAL DE COLAPSO (MATRIX CHAOS)
+   ========================================================================= */
+
+.terminal-body { 
+    background-color: #0c0c0c; 
+    color: #00ff00; 
+    font-family: monospace; 
+    min-height: 220px; 
+}
+.timer-box { 
+    font-size: 18px; 
+    color: var(--accent-blue); 
+    background: #111; 
+    padding: 15px; 
+    border-radius: 6px; 
+    margin: 15px 0; 
+    border: 1px dashed #444; 
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5); 
+}
+.matrix-red-alert {
+    color: #ff5f56 !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 95, 86, 0.6);
+}
+.matrix-yellow-warn {
+    color: #ffbd2e !important;
+    font-style: italic;
+}
+#fullscreen-matrix-glitch {
+    display: none;
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100vw !important; /* El fondo negro cubre el 100% de tu monitor */
+    height: 100vh !important;
+    background-color: #050505;
+    z-index: 99999998;
+    box-sizing: border-box;
+    padding: 30px !important;
+    overflow-y: auto !important; /* 🌟 REPARADO: Devuelve la barra navegadora al extremo derecho del monitor */
+}
+#fullscreen-matrix-glitch:not(.hidden) {
+    display: flex !important; /* Activa el motor flex para poder centrar el bloque */
+    flex-direction: column !important;
+    align-items: center !important; /* Centra el bloque de código horizontalmente en medio del monitor */
+}
+#matrix-falling-chaos {
+    width: 90% !important; /* Ocupa un ancho amplio y cómodo en la pantalla */
+    max-width: 850px !important; /* 🌟 REPARADO: Limita el texto para que se mantenga centrado y legible */
+    height: auto !important;
+    margin: 0 auto !important;
+    font-size: 13px !important; /* Letra pequeña y estética tipo código */
+    line-height: 1.6 !important;
+    text-align: left !important; /* El texto se lee de izquierda a derecha de forma natural */
+    font-family: 'Consolas', monospace !important;
+    box-sizing: border-box;
+}
+#glitch-task-input {
+    background: transparent !important;
+    border: none !important;
+    color: #00ff00 !important;
+    font-family: 'Consolas', monospace !important;
+    font-size: 14px !important;
+    outline: none !important;
+    width: 350px;
+    caret-color: var(--neon-pink);
+}
+/* Estilos para el colapso de pantalla completa Matrix */
+#fullscreen-matrix-glitch {
+    background-color: #050505;
+    color: #00ff00;
+    font-family: monospace;
+    padding: 25px;
+    overflow-y: auto;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99999998;
+    box-sizing: border-box;
+    text-align: left;
+}
+/* Pantalla de reinicio del servidor de 35 segundos */
+#server-reboot-screen {
+    background-color: #0a0a12;
+    color: #4fc1ff;
+    font-family: monospace;
+    z-index: 99999999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#server-reboot-screen .terminal-window {
+    padding: 40px;
+    max-width: 480px;
+    border-color: #4fc1ff;
+    box-shadow: 0 0 25px rgba(79, 193, 255, 0.35);
+}
+#server-reboot-screen .reboot-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #4fc1ff;
+}
+#server-reboot-screen .reboot-desc {
+    font-size: 14px;
+    color: #abb2bf;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+#server-reboot-screen .progress-container {
+    background-color: #1a1a2e;
+    border-color: #4fc1ff;
+    margin-bottom: 10px;
+}
+#reboot-progress-bar {
+    background: linear-gradient(90deg, #4fc1ff, var(--accent-purple));
+    width: 0%;
+}
+#reboot-status-text {
+    font-size: 12px;
+    color: #abb2bf;
+}
+
+
+
+
+
+
+
+
+/* =========================================================================
+   10. PANTALLAS DE CARGA, SCROLLBARS Y LIENZO
+   ========================================================================= */
+#loading-screen {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; /* Centra la caja en medio del monitor */
+    width: 800px !important; /* 🌟 REPARADO: Ahora es mucho más ancha e imponente */
+    height: 450px !important; /* Alto cómodo para el flujo de texto */
+    background-color: #0c0c0c !important; /* Negro consola puro */
+    border: 1px solid #333 !important;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.85) !important;
+    border-radius: 8px !important; /* Esquinas redondeadas estéticas */
+    overflow: hidden !important; /* Protege los bordes redondeados */
+    z-index: 99999995 !important;
+    box-sizing: border-box !important;
+    display: block !important;
+}
+#loading-screen .window-body::-webkit-scrollbar {
+    width: 6px;
+}
+#loading-screen .window-body::-webkit-scrollbar-track {
+    background: #0c0c0c;
+}
+#loading-screen .window-body::-webkit-scrollbar-thumb {
+    background: #252525;
+    border-radius: 4px;
+}
+#confetti-canvas { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    pointer-events: none; 
+    z-index: 999999999 !important; /* 🌟 REPARADO: Ahora vuela por encima de cualquier ventana flotante */
+}
+#joke-loading-screen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: #0c0c0c !important;
+    z-index: 999999 !important;
+    
+    /* 🎯 CENTRADO MATEMÁTICO DIRECTO SOBRE EL HIJO */
+    display: block !important; 
+}
+
+/* Forzamos que la caja gris de los chistes flote exactamente en medio */
+#joke-loading-screen .terminal-window.mini-box {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+/* =========================================================================
+   11. COMPONENTES ROMÁNTICOS, CARTAS DE AMOR Y FOTOS
+   ========================================================================= */
+
+.btn-group {
+    margin-top: 30px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 40px !important; /* 🌟 Esto separará los botones por 40px obligatoriamente */
+    width: 100% !important;
+    position: relative !important;
+    height: 60px !important;
+}
+#btn-si {
+    position: relative !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+}
+#btn-no {
+    position: relative !important; /* 🌟 Inicia RELATIVO para respetar el espacio y no encimarse */
+    margin: 0 !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+.huge-love-overlay { 
+    background-color: rgba(15, 10, 18, 0.94); 
+    z-index: 999999; 
+    backdrop-filter: blur(10px); 
+}
+.love-card-big { 
+    background-color: var(--bg-window); 
+    border: 2px solid var(--neon-pink); 
+    padding: 40px; 
+    border-radius: 12px; 
+    box-shadow: 0 0 30px rgba(255, 121, 198, 0.4); 
+    text-align: center; 
+    max-width: 600px; 
+    width: 90%; 
+}
+.love-card-big h2 { 
+    color: var(--neon-pink); 
+    font-size: 26px; 
+    margin-bottom: 20px; 
+}
+.love-text-main { 
+    font-size: 20px; 
+    color: #fff; 
+    margin-bottom: 10px; 
+    font-weight: bold; 
+}
+.love-text-sub { 
+    font-size: 16px; 
+    color: var(--text-main); 
+    margin-bottom: 25px; 
+    line-height: 1.6; 
+}
+.special-window { 
+    border: 2px solid #ffd700; 
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); 
+}
+.golden-theme h2 { 
+    color: #ffd700; 
+    margin-bottom: 10px; 
+}
+.highlight-text { 
+    color: #fff; 
+    font-size: 18px; 
+    font-weight: bold; 
+}
+.photos-container { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 20px; 
+    justify-content: center; 
+    background-color: #252526; 
+    padding: 25px; 
+}
+.photo-card { 
+    background: #ffffff; 
+    padding: 12px; 
+    padding-bottom: 18px; 
+    border-radius: 4px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+    width: 190px; 
+    height: fit-content; 
+    text-align: center; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+.photo-card img { 
+    width: 100%; 
+    height: auto; 
+    max-height: 200px; 
+    object-fit: contain; 
+    border: 1px solid #ddd; 
+    border-radius: 2px; 
+}
+.photo-note { 
+    color: #333333; 
+    font-size: 12px; 
+    font-family: 'Courier New', 
+    monospace; 
+    margin-top: 5px; 
+    font-weight: bold; 
+    line-height: 1.4; 
+}
+/* Estilos definitivos para la Ventana de Premio de la Súper Cita Extendida */
+#win-premio-cita {
+    width: 420px; 
+    border-color: #ffbd2e; 
+    box-shadow: 0 0 25px rgba(255, 189, 46, 0.4);
+}
+
+#win-premio-cita .window-body {
+    background-color: #1e1e1e; 
+    padding: 25px; 
+    color: #fff;
+}
+#win-premio-cita .prize-emojis {
+    font-size: 32px; 
+    margin-bottom: 10px;
+}
+#win-premio-cita .prize-main-title {
+    font-size: 18px; 
+    font-weight: bold; 
+    color: #ffbd2e; 
+    margin-bottom: 15px;
+}
+#win-premio-cita .prize-details-box {
+    font-size: 13px; 
+    color: #fff; 
+    line-height: 1.6; 
+    margin-bottom: 20px; 
+    text-align: left; 
+    background: #222; 
+    padding: 15px; 
+    border-left: 3px solid #ffbd2e; 
+    border-radius: 0 4px 4px 0;
+}
+#win-premio-cita .prize-details-box p {
+    margin-bottom: 8px;
+}
+#win-premio-cita .prize-details-box p:last-child {
+    margin-bottom: 0; 
+    font-size: 12px; 
+    color: #abb2bf; 
+    border-top: 1px dashed #444; 
+    padding-top: 8px; 
+    margin-top: 8px;
+}
+#win-premio-cita .btn-claim-prize {
+    background-color: #6a9955; 
+    color: #fff; 
+    border-color: #8cc379; 
+    padding: 10px; 
+    font-weight: bold; 
+    width: 100%; 
+    font-size: 13px;
+}
+
+
+
+
+
+
+/* =========================================================================
+   12. ANIMACIONES GLOBALES
+   ========================================================================= */
+.explode-animation { 
+    animation: smokeBlow 0.4s ease-out forwards; 
+    pointer-events: none; 
+}
+@keyframes smokeBlow { 0% { 
+    transform: scale(1); 
+    opacity: 1; 
+    filter: blur(0px); } 50% { transform: scale(1.5); 
+    opacity: 0.5; 
+    filter: blur(4px); 
+    color: #ff5f56; } 100% { transform: scale(0); 
+    opacity: 0; 
+    filter: blur(10px); 
+} }
+.particle-boom {
+    position: fixed;
+    font-size: 20px;
+    pointer-events: none;
+    z-index: 99999;
+    animation: particleFly 0.6s ease-out forwards;
+}
+@keyframes particleFly {
+    0% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        /* Se disparan hacia afuera usando variables dinámicas de JavaScript */
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0) rotate(var(--r));
+        opacity: 0;
+    }
+}
+.heart-beat-click {
+    transform: scale(1.3);
+}
+.footer-egg { 
+    color: #888; 
+    font-size: 11px; 
+    margin-top: 15px; 
+}
+
+
+
+
+/* =========================================================================
+   13. COMPONENTES INTERNOS DE LA TERMINAL DE CARGA
+   ========================================================================= */
+.custom-header {
+    background: #1a1a1a;
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.custom-header .dot-group {
+    display: flex;
+    gap: 6px;
+}
+.custom-header .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.custom-header .dot.red { background: #ff5f56; }
+.custom-header .dot.yellow { background: #ffbd2e; }
+.custom-header .dot.green { background: #27c93f; }
+
+.custom-header .window-title {
+    color: #abb2bf;
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: auto;
+    margin-left: 15px;
+}
+
+.terminal-split-body {
+    padding: 15px;
+    height: calc(100% - 35px);
+    display: flex;
+    gap: 15px;
+    box-sizing: border-box;
+    background-color: #0c0c0c;
+}
+
+.terminal-active-body {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+#boot-text {
+    text-align: left;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #fff;
+}
+
+#terminal-input-zone {
+    text-align: left;
+    margin-top: auto;
+    width: 100%;
+}
+
+.terminal-input-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+}
+
+.terminal-input-row input {
+    background: transparent;
+    border: none;
+    color: #00ff00;
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    outline: none;
+    flex-grow: 1;
+    text-align: left;
+}
+
+#v2-bitacora-respuestas {
+    width: 220px;
+    height: 100%;
+    border-left: 1px dashed #333;
+    padding-left: 15px;
+    overflow-y: auto;
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    color: #888;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+/* Estilos definitivos para la ventana dinámica de logros y adivinanzas */
+#win-logro-puntos {
+    width: 420px;
+}
+#win-logro-puntos .window-body {
+    background-color: #1e1e1e;
+    padding: 25px;
+    color: #fff;
+}
+#logro-puntos-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffbd2e;
+    margin-bottom: 15px;
+}
+#logro-puntos-pista {
+    font-size: 13px;
+    color: #abb2bf;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    border-top: 1px dashed #333;
+    padding-top: 15px;
+    text-align: left;
+}
+#btn-close-logro {
+    background-color: #3a3d3d;
+    color: #fff;
+    border-color: #555;
+    padding: 8px 25px;
+    font-weight: bold;
+    width: 100%;
+}
+
+
+/* =========================================================================
+   14. PANTALLA DE PROTOCOLO DE CASTIGO (MINIJUEGO CLICKER)
+   ========================================================================= */
+#punishment-screen {
+    background-color: rgba(30, 5, 10, 0.96); 
+    z-index: 999999; 
+    backdrop-filter: blur(15px); 
+    width: 100vw; 
+    height: 100vh; 
+    position: fixed; 
+    top: 0; 
+    left: 0;
+}
+#punishment-screen .terminal-window {
+    padding: 35px; 
+    max-width: 450px; 
+    border-color: #ff5f56; 
+    box-shadow: 0 0 25px rgba(255, 95, 86, 0.4);
+}
+#punishment-screen .punish-alert {
+    color: #ff5f56; 
+    font-weight: bold; 
+    font-size: 18px; 
+    margin-bottom: 10px;
+}
+#punishment-screen .punish-desc {
+    font-size: 14px; 
+    color: #d4d4d4; 
+    margin-bottom: 20px;
+}
+#broken-heart-clicker {
+    font-size: 64px; 
+    cursor: pointer; 
+    user-select: none; 
+    display: inline-block; 
+    margin: 15px 0; 
+    transition: transform 0.1s ease;
+}
+#punishment-screen .progress-container {
+    background-color: #442222; 
+    border-color: #ff5f56; 
+    margin-top: 15px;
+}
+#punish-progress-bar {
+    background: linear-gradient(90deg, #ff5f56, #ffbd2e); 
+    width: 0%;
+}
+#punish-clicks-text {
+    font-size: 12px; 
+    color: #ffbd2e; 
+    margin-top: 8px;
+}

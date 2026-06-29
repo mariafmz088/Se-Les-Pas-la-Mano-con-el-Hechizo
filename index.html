@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C:\Maria> _</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+
+ <!-- ==========================================
+         1. PANTALLAS DE CARGA E INICIO (FASES DOS)
+      ========================================== -->    
+
+    <div id="loading-screen" class="screen window">
+        <div class="window-header draggable-header custom-header">
+            <div class="dot-group">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+            </div>
+            <span class="window-title">boot_sequence.sh</span>
+        </div>
+        
+        <div class="window-body terminal-split-body">
+            
+            <!-- Columna Izquierda: Terminal Activa con Auto-Scroll reparado -->
+            <div class="terminal-active-body">
+                <div id="boot-text"></div>
+                
+                <div id="terminal-input-zone" class="hidden">
+                    <span id="terminal-prompt-text" style="font-family: 'Consolas', monospace; display: block; margin-bottom: 5px; color: var(--accent-yellow); text-align: left;"></span>
+                    <div class="terminal-input-row">
+                        <span style="color: var(--accent-purple); font-weight: bold; font-family: 'Consolas', monospace;">$ root@main_os: ~ </span>
+                        <input type="text" id="terminal-user-input" autofocus>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Panel de Bitácora -->
+            <div id="v2-bitacora-respuestas">
+                <span style="color: var(--accent-purple); font-weight: bold; display: block; margin-bottom: 8px; border-bottom: 1px dashed #333; padding-bottom: 4px;">📋 HISTORIAL_DE_REGISTROS</span>
+                <div id="v2-lista-palabras-guardadas" style="line-height: 1.6;">
+                    <span style="color: #444; font-style: italic;">Esperando transmisiones...</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="joke-loading-screen" class="screen hidden">
+        <div class="terminal-window mini-box text-center">
+            <div class="spinner-love">⚙️ Loading Systems...</div>
+            <div id="joke-display" class="joke-box">Cargando datillos de amor...</div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="countdown-text"></div>
+            <!-- 🌟 REPARADO: Ahora sí tiene la acción para limpiar tiempos e ir al escritorio -->
+            <button id="btn-skip-loading" onclick="openWindow('win-viejito');">Saltar carga e ir directo 🚀</button>
+        </div>
+    </div>
+
+ <!-- ==========================================
+       2. VENTANAS EMERGENTES Y POPUPS
+      ========================================== -->
+
+    <div id="win-viejito" class="window hidden special-window">
+        <div class="window-header">
+            <div class="dot-group">
+                <span class="dot red" onclick="closeWindow('win-viejito')"></span>
+            </div>
+            <span class="window-title">System.Warning</span>
+        </div>
+        <div class="window-body text-center">
+            <p class="warning-title">⚠️ [WARNING]: ¿Viejo aburrido detectado?</p>
+            <p class="warning-desc">¿Estás completamente seguro de que quieres saltarte los datos informativos súper importantes que dejó tu noviecita?</p>
+            <div class="btn-container">
+                <button onclick="confirmSkip(true)">Sí, soy un viejo aburrido</button>
+                <button onclick="confirmSkip(false)" class="btn-green">No, quiero leer ❤️</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="huge-yes-panel" class="screen hidden huge-love-overlay">
+        <div class="love-card-big">
+            <h2>❤️ ¡SABÍA QUE DIRÍAS QUE SÍ! ❤️</h2>
+            <p class="love-text-main">Gracias por seguir eligiéndome cada día.</p>
+            <p class="love-text-sub">Prometo seguir aprendiendo, seguir creciendo contigo y seguir amándote muchísimo de aquí a la luna con pasitos de tortuga:3 ✨</p>
+            <button onclick="closeHugeYes()">Volver al Escritorio 💜</button>
+        </div>
+    </div>
+
+ <!-- ==========================================
+         3. ESCRITORIO PRINCIPAL DEL JUEGO
+      ========================================== -->
+
+    <div id="desktop-screen" class="screen hidden">
+        <header class="system-bar">
+            <div class="system-title">💜 Maria_Support_Center v1.0</div>
+            <div id="live-clock" class="system-clock">00:00:00</div>
+        </header>
+
+        <!-- BARRA DE HERRAMIENTAS LATERAL CONTRARIO (DERECHA) -->
+        <aside class="system-dock-right">
+            <div class="dock-title">APPS</div>
+            <div id="dock-win-carta" class="dock-item" onclick="toggleMinimize('win-carta', 'readCarta')">📄 Carta</div>
+            <div id="dock-win-json" class="dock-item" onclick="toggleMinimize('win-json', 'readJson')">⚙️ JSON</div>
+            <div id="dock-win-log" class="dock-item" onclick="toggleMinimize('win-log', 'readLog')">📋 Logs</div>
+            <div id="dock-win-exe" class="dock-item" onclick="toggleMinimize('win-exe', 'runNovioExe')">🚀 Novio</div>
+            <div id="dock-win-contador" class="dock-item" onclick="toggleMinimize('win-contador')">⏳ Uptime</div>
+            <div id="dock-win-recuerdos" class="dock-item" onclick="toggleMinimize('win-recuerdos', 'readRecuerdos')">📁 Fotos</div>
+            <div id="dock-win-perdonar" class="dock-item" onclick="toggleMinimize('win-perdonar')">💝 heart</div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL DEL ESCRITORIO -->
+        <main class="desktop-content">
+
+            <!-- FONDO DE PANTALLA -->
+            <div class="desktop-wallpaper-widget">
+                <h1>Main( ) {</h1>
+                <p>  return "Mi operador favorito";</p>
+                <h1>}</h1>
+            </div>
+
+            <!-- MARCADOR DE PUNTOS DE TERNURA -->
+            <div class="score-board">
+                <div class="score-title">🏆 SCORE DE TERNURA</div>
+                <div class="score-value"><span id="current-score">0</span> / 2500 pts</div>
+                <div class="score-goal">Meta: Desbloquear Súper Cita ✨</div>
+            </div>
+
+
+            <!-- 🖥️ CUADRÍCULA DE ICONOS DEL ESCRITORIO -->
+            <div class="file-grid">
+                <div class="file-icon" onclick="openWindow('win-carta'); readCarta();">
+                    <div class="icon-visual">📄</div>
+                    <span class="icon-label">Carta.txt</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-json'); readJson();">
+                    <div class="icon-visual">⚙️</div>
+                    <span class="icon-label">Motivos_para_amarte.json</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-log'); readLog();">
+                    <div class="icon-visual">📋</div>
+                    <span class="icon-label">Errores.log</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-exe'); runNovioExe();">
+                    <div class="icon-visual">🚀</div>
+                    <span class="icon-label">Novio.exe</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-contador')">
+                    <div class="icon-visual">⏳</div>
+                    <span class="icon-label">uptime_tracker.sh</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-recuerdos'); readRecuerdos();">
+                    <div class="icon-visual">📁</div>
+                    <span class="icon-label">Recuerdos/</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-perdonar')">
+                    <div class="icon-visual">💝</div>
+                    <span class="icon-label">heart_hotfix.sh</span>
+                </div>
+                <div class="file-icon" onclick="openWindow('win-papelera'); readPapelera();">
+                    <div class="icon-visual">🗑️</div>
+                    <span class="icon-label">Papelera.exe</span>
+                </div>
+
+            </div>
+
+            <!-- Ventanas con botones y títulos perfectamente ordenados -->
+             <!-- Ventana: Papelera de La SuperCarta -->
+            <div id="win-carta" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-carta')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-carta')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">Carta.txt</span>
+                </div>
+                <div id="body-carta" class="window-body letter-theme"></div>
+            </div>
+
+            <!-- Ventana: Papelera de Motivos para amar a mi precioso -->
+            <div id="win-json" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-json')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-json')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">Motivos_para_amarte.json</span>
+                </div>
+                <div class="window-body code-theme"><pre id="body-json"></pre></div>
+            </div>
+
+            <!-- Ventana: Papelera de Mis babosadas -->
+            <div id="win-log" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-log')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-log')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">Errores.log</span>
+                </div>
+                <div id="body-log" class="window-body log-theme"></div>
+            </div>
+
+            <!-- Ventana: Papelera de Novio Perfecto -->
+            <div id="win-exe" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-exe')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-exe')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">Novio.exe</span>
+                </div>
+                <div id="exe-body" class="window-body terminal-body"></div>
+            </div>
+
+            <!-- Ventana: Papelera de Tiempo Juntos -->
+            <div id="win-contador" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-contador')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-contador')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">uptime_tracker.sh</span>
+                </div>
+                <div class="window-body text-center">
+                    <h3>Uptime de la sesión actual (Main + Maria):</h3>
+                    <div id="timer-display" class="timer-box">Calculando tiempo...</div>
+                    <div class="hint-text">// Status: 200 OK | Connection: Keep-Alive</div>
+                </div>
+            </div>
+
+            <!-- Ventana: Papelera de Recuerdos -->
+            <div id="win-recuerdos" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-recuerdos')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-recuerdos')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">Recuerdos/</span>
+                </div>
+                <div id="body-recuerdos" class="window-body photos-container"></div>
+            </div>
+
+            <!-- Ventana: Papelera de Reciclaje Limpia -->
+            <div id="win-papelera" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-papelera')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-papelera')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">Papelera de Reciclaje</span>
+                </div>
+                <div class="window-body log-theme">
+                    <!-- Contenedor normal con los archivos inyectados por JS -->
+                    <div id="body-papelera"></div>
+                    <button id="btn-vaciar-papelera" onclick="tryEmptyTrash()">Vaciar Papelera de Reciclaje</button>
+                </div>
+            </div>
+
+            <!-- PANTALLAS COMPLETA MATRIX V5.0 -->
+            <div id="fullscreen-matrix-glitch" class="screen hidden">
+                <div id="matrix-falling-chaos"></div>
+            </div>
+
+            <!-- PANTALLA INTERMEDIA: RESTABLECIENDO SERVIDORES -->
+            <div id="server-reboot-screen" class="screen hidden">
+                <div class="terminal-window text-center">
+                    <div class="reboot-title">🌀 RECONECTANDO CON EL NÚCLEO</div>
+                    <p class="reboot-desc">
+                        Parche de seguridad aplicado con éxito. Reanudando todas las operaciones del sistema operativo...
+                    </p>
+                    <div class="progress-container">
+                        <div id="reboot-progress-bar" class="progress-bar"></div>
+                    </div>
+                    <div id="reboot-status-text">Estado: Inicializando reconexión...</div>
+                </div>
+            </div>
+       
+            <!-- Ventana Alerta Especial: Tu advertencia del sistema modificada -->
+            <div id="win-alerta-papelera" class="window hidden special-window">
+                <div class="window-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-alerta-papelera')"></span>
+                    </div>
+                    <span class="window-title">System.Security_Alert</span>
+                </div>
+                <div class="window-body text-center">
+                    <p class="alert-title">⚠️ ACCIÓN RESTRINGIDA POR EL SISTEMA</p>
+                    <p class="alert-desc">
+                        Peligro: Los archivos esenciales de este entorno no se pueden eliminar permanentemente para evitar caer en los errores del pasado y garantizar la estabilidad continua de la relación.
+                    </p>
+                    <button onclick="closeWindow('win-alerta-papelera')" class="btn-alert-close">Entendido 💜</button>
+                </div>
+            </div>
+
+            <!-- VENTANA PREMIO FINAL: LA SÚPER CITA DESBLOQUEADA -->
+            <div id="win-premio-cita" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-premio-cita')"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">✨ Reward_Unlocking.exe</span>
+                </div>
+                <div class="window-body text-center">
+                    <div class="prize-emojis">Compass✨Map</div>
+                    <div class="prize-main-title">¡RECOMPENSA MÁXIMA DESBLOQUEADA! ❤️</div>
+                    
+                    <div class="prize-details-box">
+                        <p><strong>¡Felicidades, Main!</strong> Has demostrado ser el novio más inteligente, guapo y consentido del mundo al juntar los 2500 puntos de ternura completos. 🏆</p>
+                        <p style="color: var(--accent-green); font-weight: bold;">🎁 TU PREMIO OFICIAL:</p>
+                        <p style="font-weight: bold; color: #4fc1ff;">👉 Te has ganado una SÚPER CITA oficialmente planificada y detallada por tu noviecita hermosa. 🥰</p>
+                        <p>📌 <strong>Instrucciones de canje:</strong> Para hacer válido este cupón, debes tomar una <strong>captura de pantalla completa</strong> de esta ventana y notificárselo a la administradora con un mínimo de <strong>15 días de anticipación</strong> <span style="color:var(--accent-yellow); font-style:italic;">(tiempo negociable con mimos)</span>.</p>
+                    </div>
+                    
+                    <button onclick="closeWindow('win-premio-cita')" class="btn-claim-prize">Reclamar Premio con Mimos 💜</button>
+                </div>
+            </div>
+
+            <!-- Ventana de mandarina de paz -->
+            <div id="win-perdonar" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-perdonar')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-perdonar')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">heart_hotfix.sh</span>
+                </div>
+                <div id="forgive-content" class="window-body text-center active-panel">
+                    <h3>Perdón por los días en los que mi terquedad o mis silencios nos hacen pasar por momentos tensos. Me duele mucho cuando estamos distantes, sabes que eres lo más bonito que tengo. Sé que soy un poco un desastre, aún estoy aprendiendo a explicarme mejor, pero nunca dudes de que te amo con toda mi alma. Eres mi lugar seguro en el mundo y mi persona ¿Mandarina de paz? </h3>
+                    <div class="btn-group">
+                        <button id="btn-si" onclick="forgiveAccepted()">Mandarina de Paz ♥</button>
+                        <button id="btn-no">Limón (No)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ventana de logros ocultos -->
+            <div id="win-easter" class="window hidden special-window">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-easter')"></span>
+                        <span class="dot yellow" onclick="minimizeWindow('win-easter')"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title">🏆 Achievement_Unlocked.cfg</span>
+
+                </div>
+                <div class="window-body text-center golden-theme">
+                    <h2>🏆 ACHIEVEMENT UNLOCKED!</h2>
+                    <p class="highlight-text">El hombre más guapo del mundo</p>
+                    <p class="points">+100 Puntos de Ternura Obtenidos</p>
+                    <p class="footer-egg">System.out.println("Te amo con todo mi enano ser");</p>
+                </div>
+            </div>
+
+
+            <div id="win-logro-puntos" class="window hidden">
+                <div class="window-header draggable-header">
+                    <div class="dot-group">
+                        <span class="dot red" onclick="closeWindow('win-logro-puntos')"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="window-title" id="logro-puntos-header">✨ Achievement.Unlocked</span>
+
+                </div>
+                <div class="window-body text-center">
+                    <div id="logro-puntos-text"></div>
+                    <div id="logro-puntos-pista"></div>
+                    <button id="btn-close-logro">Aceptar 💜</button>
+                </div>
+            </div>
+
+            <!-- PANTALLA DE PROTOCOLO DE CASTIGO-->
+            <div id="punishment-screen" class="screen hidden">
+                <div class="terminal-window text-center">
+                    <div class="punish-alert">⚠️ ALERTA: DEFECTO DETECTADO EN EL PROCESO</div>
+                    <p class="punish-desc">Has intentado rechazar a tu noviecita. El sistema se ha congelado por seguridad. Para reanudar las operaciones, debes reparar el daño.</p>
+                    
+                    <!-- El botón del minijuego clicker -->
+                    <div id="broken-heart-clicker" onclick="clickPunishmentHeart()">💔</div>
+                    
+                    <!-- Barra de progreso de reparación -->
+                    <div class="progress-container">
+                        <div id="punish-progress-bar" class="progress-bar"></div>
+                    </div>
+                    <div id="punish-clicks-text">Progreso de reparación: 0 / 15 clics</div>
+                </div>
+            </div>
+
+
+        </main>
+    </div>
+
+ <!-- ==========================================
+         4. EFECTOS ESPECIALES Y MOTORES DE SCRIPT
+      ========================================== -->
+    <!-- 🎵 REPRODUCTOR DE MÚSICA REAL -->
+    <audio id="musica-cyber" src="msc/1.mp3" loop></audio>
+    <audio id="musica-carga" src="msc/2.mp3" loop></audio>
+    <audio id="musica-matrix" src="msc/3.mp3" loop></audio>
+
+    <canvas id="confetti-canvas"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
